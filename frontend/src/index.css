@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #4F46E5;
+    --primary-dark: #4338CA;
+    --secondary: #A78BFA;
+    --background: #F8FAFC;
+    --surface: #FFFFFF;
+    --text-primary: #0F172A;
+    --text-secondary: #64748B;
+    --border: #E2E8F0;
+  }
+
+  html.dark {
+    --primary: #6366F1;
+    --primary-dark: #4F46E5;
+    --secondary: #C4B5FD;
+    --background: #0F172A;
+    --surface: #1E293B;
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --border: #334155;
+  }
+
+  body {
+    @apply transition-colors duration-300;
+  }
+}
+
+@layer components {
+  /* Card Component */
+  .card {
+    @apply transition-all duration-300 hover:shadow-xl;
+  }
+
+  /* Button Component */
+  .btn-primary {
+    @apply px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-gray-200 text-gray-900 rounded-lg font-semibold hover:bg-gray-300 transition-colors dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600;
+  }
+
+  /* Grid Utilities */
+  .grid-products-5 {
+    @apply grid grid-cols-5 gap-6;
+  }
+
+  .grid-products-3 {
+    @apply grid grid-cols-3 gap-6;
+  }
+
+  .grid-products-2 {
+    @apply grid grid-cols-2 gap-6;
+  }
+
+  /* Responsive Grid */
+  @media (max-width: 1536px) {
+    .grid-products-5 {
+      @apply grid-cols-4;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .grid-products-5 {
+      @apply grid-cols-3;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .grid-products-5 {
+      @apply grid-cols-2;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .grid-products-5 {
+      @apply grid-cols-1;
+    }
+  }
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-indigo-600 dark:bg-indigo-500 rounded-full hover:bg-indigo-700;
+}
+
+/* Animation Classes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+/* Text Utilities */
+.line-clamp-1 {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Premium Shadow Utilities */
+.shadow-premium {
+  @apply shadow-lg hover:shadow-2xl transition-shadow duration-300;
+}
+
+.shadow-premium-lg {
+  @apply shadow-2xl hover:shadow-xl transition-shadow duration-300;
+}
+
+/* Gradients */
+.gradient-primary {
+  @apply bg-gradient-to-r from-indigo-600 to-purple-600;
+}
+
+.gradient-premium {
+  @apply bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900;
+}
