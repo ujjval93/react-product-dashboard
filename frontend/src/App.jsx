@@ -5,6 +5,8 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import HomePage from './components/HomePage'
 import Detail from './components/Detail'
 import Create from './components/Create'
+import Cart from './components/Cart'
+import Wishlist from './components/Wishlist'
 import ToastContainer from './components/ToastContainer'
 
 // ToastContainer reads notifications from context itself — no need to pass props
@@ -17,6 +19,8 @@ const App = () => {
             <Route path='/' element={<HomePage />} />
             <Route path='/create' element={<Create />} />
             <Route path="/detail/:id" element={<Detail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/wishlist" element={<Wishlist />} />
           </Routes>
           <ToastContainer />
         </div>

@@ -5,7 +5,10 @@ import Axios from './axios';
 export const ProductContext = createContext();
 
 const Context = (props) => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('products')) || []; }
+    catch { return []; }
+  });
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem('cart')) || []; }
@@ -21,7 +24,13 @@ const Context = (props) => {
     setLoading(true);
     try {
       const { data } = await Axios('/products');
-      setProducts(data || []);
+      // Merge API products with locally created products
+      const localProducts = (() => {
+        try { return JSON.parse(localStorage.getItem('customProducts')) || []; }
+        catch { return []; }
+      })();
+      const mergedProducts = [...(data || []), ...localProducts];
+      setProducts(mergedProducts);
     } catch (error) {
       console.error('Failed to load products', error);
       addToast({ title: 'Failed to load products', message: 'Please refresh the page.', type: 'error' });
@@ -31,6 +40,10 @@ const Context = (props) => {
   };
 
   useEffect(() => { getProducts(); }, []);
+
+  useEffect(() => {
+    localStorage.setItem('products', JSON.stringify(products));
+  }, [products]);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -79,6 +92,17 @@ const Context = (props) => {
     addToast({ title: 'Cart cleared', message: 'All items removed from cart.', type: 'error' });
   };
 
+  // ── Product actions ───────────────────────────────────────────
+  const addProduct = (product) => {
+    setProducts((prev) => [...prev, product]);
+    try {
+      const customProducts = JSON.parse(localStorage.getItem('customProducts')) || [];
+      localStorage.setItem('customProducts', JSON.stringify([...customProducts, product]));
+    } catch (error) {
+      console.error('Failed to save product to localStorage', error);
+    }
+  };
+
   // ── Wishlist actions ──────────────────────────────────────────
   const toggleWishlist = (product) => {
     const exists = wishlist.some((item) => item.id === product.id);
@@ -119,6 +143,7 @@ const Context = (props) => {
         removeFromCart,
         updateCartQuantity,
         clearCart,
+        addProduct,
         toggleWishlist,
         categories,
         totalCartItems,

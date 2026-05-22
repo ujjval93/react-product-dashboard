@@ -40,3 +40,11 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Ensure gradient-clipped text remains visible when selected */
+.premium-selection::selection {
+  -webkit-text-fill-color: currentColor; /* ensures clipped text shows the selection color */
+}
+.premium-selection::-moz-selection {
+  color: currentColor;
+}

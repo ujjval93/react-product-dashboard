@@ -38,7 +38,9 @@ const HeroSection = () => {
         <motion.div variants={containerVariants} className="w-full">
           <motion.p
             variants={itemVariants}
-            className="text-sm uppercase tracking-[0.35em] font-semibold text-indigo-500"
+            className={`text-sm uppercase tracking-[0.35em] font-semibold ${
+              darkMode ? 'text-indigo-400' : 'text-indigo-600'
+            }`}
           >
             Premium Retail
           </motion.p>
@@ -48,7 +50,7 @@ const HeroSection = () => {
             className="mt-5 text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold leading-tight tracking-tight"
           >
             Discover beautifully curated products that feel{' '}
-            <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text  premium-selection selection:bg-indigo-600/40 selection:text-white dark:selection:bg-indigo-400/40">
               premium
             </span>
             , modern, and effortless.
@@ -58,7 +60,7 @@ const HeroSection = () => {
             variants={itemVariants}
             className={`mt-6 max-w-xl text-base leading-8 sm:text-lg ${
               darkMode ? 'text-slate-300' : 'text-slate-500'
-            }`}
+            }`} 
           >
             Shop from best-in-class brands with elegant packaging, fast shipping,
             and a refined ecommerce experience designed for confident buying.
@@ -101,16 +103,16 @@ const HeroSection = () => {
             ].map((item) => (
               <div
                 key={item.title}
-                className={`rounded-2xl border p-5 shadow-sm ${
+                className={`rounded-2xl border p-5 ${
                   darkMode
-                    ? 'border-slate-800 bg-slate-900/90'
-                    : 'border-slate-200/80 bg-white/90'
+                    ? 'border-slate-800 bg-slate-900/90 shadow-sm'
+                    : 'border-slate-300 bg-white shadow-md'
                 }`}
               >
                 <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
                   {item.title}
                 </p>
-                <p className={`mt-1 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                <p className={`mt-1 text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                   {item.subtitle}
                 </p>
               </div>
@@ -137,10 +139,10 @@ const HeroSection = () => {
           <div className={`absolute left-5 top-5 z-20 rounded-2xl border px-4 py-3 shadow-lg backdrop-blur-xl ${
             darkMode
               ? 'border-slate-700/70 bg-slate-950/90'
-              : 'border-white/60 bg-white/90'
+              : 'border-slate-300 bg-white'
           }`}>
             <p className="text-sm font-semibold text-indigo-600">Fast Delivery</p>
-            <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
               2-3 day shipping across the US
             </p>
           </div>
@@ -149,12 +151,12 @@ const HeroSection = () => {
           <div className={`absolute bottom-5 right-5 z-20 rounded-2xl border px-4 py-3 shadow-lg backdrop-blur-xl ${
             darkMode
               ? 'border-slate-700/70 bg-slate-950/90'
-              : 'border-white/60 bg-white/90'
+              : 'border-slate-300 bg-white'
           }`}>
             <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
               Verified Quality
             </p>
-            <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
               Curated and quality assured
             </p>
           </div>

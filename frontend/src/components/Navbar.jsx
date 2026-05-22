@@ -31,11 +31,13 @@ const Navbar = () => {
 
         {/* Logo + nav links */}
         <div className="flex min-w-0 items-center gap-6">
-          <NavLink to="/" className="flex items-center gap-3 text-lg font-semibold tracking-tight text-slate-900 transition dark:text-white">
+          <NavLink to="/" className={`flex items-center gap-3 text-lg font-semibold tracking-tight transition ${
+            darkMode ? 'text-white' : 'text-slate-900'
+          }`}>
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/20">
               <span className="text-lg font-black text-white">P</span>
             </div>
-            <span className="text-xl">Prestige</span>
+            <span className="text-xl font-bold">Prestige</span>
           </NavLink>
 
           <div className="hidden xl:flex items-center gap-6">

@@ -21,15 +21,25 @@ const Detail = () => {
   const { id } = useParams();
   const { darkMode } = useDarkMode();
   const navigate = useNavigate();
-  const { addToCart, toggleWishlist, wishlist } = useContext(ProductContext);
+  const { addToCart, toggleWishlist, wishlist, products } = useContext(ProductContext);
 
   const getSingleProduct = async () => {
     setLoading(true);
     try {
+      // First, check if product exists in context (for locally created products)
+      const contextProduct = products.find((p) => String(p.id) === String(id));
+      if (contextProduct) {
+        setProduct(contextProduct);
+        setLoading(false);
+        return;
+      }
+
+      // If not found in context, try to fetch from API
       const { data } = await axios.get(`/products/${id}`);
       setProduct(data);
     } catch (error) {
       console.error('Detail load failed', error);
+      setProduct(null);
     } finally {
       setLoading(false);
     }
@@ -37,7 +47,7 @@ const Detail = () => {
 
   useEffect(() => {
     if (id) getSingleProduct();
-  }, [id]);
+  }, [id, products]);
 
   const handleAddToCart = () => {
     if (!product) return;

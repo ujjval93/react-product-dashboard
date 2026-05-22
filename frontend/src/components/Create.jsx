@@ -8,7 +8,7 @@ import Navbar from './Navbar'
 import { useDarkMode } from '../hooks/useDarkMode'
 
 const Create = () => {
-  const { products, setProducts } = useContext(ProductContext)
+  const { addProduct } = useContext(ProductContext)
   const { darkMode } = useDarkMode()
   const navigate = useNavigate()
 
@@ -82,7 +82,8 @@ const Create = () => {
       description: formData.description,
     }
 
-    setProducts([...products, product])
+    // Use context's addProduct to save with persistence
+    addProduct(product)
     setSubmitted(true)
 
     setTimeout(() => {
