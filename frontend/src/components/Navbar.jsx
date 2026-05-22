@@ -1,9 +1,14 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X, ShoppingCart, Heart, Moon, Sun } from 'lucide-react';
+import { Menu, X, ShoppingCart, Heart, Moon, Sun, Search } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { ProductContext } from '../utils/Context';
+
+/*
+  Font: add to index.html <head>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+*/
 
 const navItems = [
   { label: 'Products', to: '/' },
@@ -11,203 +16,245 @@ const navItems = [
   { label: 'Contact', to: '#contact' },
 ];
 
+const GOLD = '#B07D4A';
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { darkMode, toggleTheme } = useDarkMode();
   const { totalCartItems, totalWishlistItems } = useContext(ProductContext);
   const navigate = useNavigate();
 
-  return (
-    <motion.nav
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1, transition: { duration: 0.35, ease: 'easeOut' } }}
-      className={`sticky top-0 z-50 border-b backdrop-blur-2xl transition-colors duration-300 ${
-        darkMode
-          ? 'bg-slate-950/90 border-slate-800/70'
-          : 'bg-white/90 border-slate-200'
-      } shadow-sm`}
-    >
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-        {/* Logo + nav links */}
-        <div className="flex min-w-0 items-center gap-6">
-          <NavLink to="/" className={`flex items-center gap-3 text-lg font-semibold tracking-tight transition ${
-            darkMode ? 'text-white' : 'text-slate-900'
-          }`}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-r from-indigo-600 to-purple-600 shadow-lg shadow-indigo-500/20">
-              <span className="text-lg font-black text-white">P</span>
+  const navBg = darkMode
+    ? scrolled ? 'bg-neutral-950/95 border-neutral-800' : 'bg-neutral-950 border-neutral-900'
+    : scrolled ? 'bg-white/95 border-neutral-200 shadow-sm' : 'bg-white border-transparent';
+
+  return (
+    <>
+      <motion.nav
+        initial={{ y: -64, opacity: 0 }}
+        animate={{ y: 0, opacity: 1, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } }}
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+        className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-300 ${navBg}`}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-8 lg:px-10">
+
+          {/* Logo */}
+          <NavLink
+            to="/"
+            className="flex items-center gap-3 select-none"
+            style={{ textDecoration: 'none' }}
+          >
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-sm text-white text-sm font-semibold tracking-wider"
+              style={{ background: GOLD, fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600 }}
+            >
+              P
             </div>
-            <span className="text-xl font-bold">Prestige</span>
+            <span
+              className={`text-xl tracking-tight select-none ${darkMode ? 'text-white' : 'text-neutral-900'}`}
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 500, letterSpacing: '-0.01em' }}
+            >
+              Prestige
+            </span>
           </NavLink>
 
-          <div className="hidden xl:flex items-center gap-6">
+          {/* Desktop nav links */}
+          <div className="hidden xl:flex items-center gap-8">
             {navItems.map((item) => (
               <NavLink
                 key={item.label}
                 to={item.to}
-                className={({ isActive }) =>
-                  `text-sm font-medium transition-colors duration-200 ${
-                    isActive
-                      ? 'text-indigo-600 dark:text-indigo-400'
-                      : darkMode
-                      ? 'text-slate-300 hover:text-indigo-400'
-                      : 'text-slate-700 hover:text-indigo-600'
-                  }`
-                }
+                style={({ isActive }) => ({
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 400,
+                  letterSpacing: '0.04em',
+                  color: isActive ? GOLD : darkMode ? '#a3a3a3' : '#525252',
+                  borderBottom: isActive ? `1px solid ${GOLD}` : '1px solid transparent',
+                  paddingBottom: 2,
+                  textDecoration: 'none',
+                  transition: 'color 0.2s, border-color 0.2s',
+                })}
               >
                 {item.label}
               </NavLink>
             ))}
           </div>
-        </div>
 
-        {/* Search hint (desktop) */}
-        <div className="hidden lg:flex flex-1 items-center justify-center px-4">
-          <div className={`flex w-full max-w-xl items-center gap-3 rounded-full border px-4 py-2 shadow-sm transition-colors duration-300 ${
-            darkMode ? 'border-slate-800 bg-slate-950/80 text-white' : 'border-slate-200 bg-white text-slate-700'
-          }`}>
-            <span className={`text-sm ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-              Search premium products on the homepage
-            </span>
+          {/* Search bar — desktop */}
+          <div className="hidden lg:flex flex-1 max-w-xs mx-8">
+            <div className={`flex w-full items-center gap-2 rounded-sm border px-3.5 py-2 transition-colors ${
+              darkMode ? 'border-neutral-800 bg-neutral-900' : 'border-neutral-200 bg-neutral-50'
+            }`}>
+              <Search size={14} className={darkMode ? 'text-neutral-500' : 'text-neutral-400'} />
+              <span className={`text-xs ${darkMode ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                Search products…
+              </span>
+            </div>
+          </div>
+
+          {/* Action icons */}
+          <div className="flex items-center gap-1.5">
+            {/* Theme toggle */}
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={toggleTheme}
+              className={`flex h-9 w-9 items-center justify-center rounded-sm border transition-colors ${
+                darkMode
+                  ? 'border-neutral-800 bg-transparent text-neutral-400 hover:text-amber-400 hover:border-neutral-700'
+                  : 'border-neutral-200 bg-transparent text-neutral-500 hover:text-neutral-800'
+              }`}
+              aria-label="Toggle theme"
+            >
+              {darkMode ? <Sun size={17} /> : <Moon size={17} />}
+            </motion.button>
+
+            {/* Wishlist */}
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={() => navigate('/wishlist')}
+              className={`relative flex h-9 w-9 items-center justify-center rounded-sm border transition-colors ${
+                darkMode
+                  ? 'border-neutral-800 bg-transparent text-neutral-400 hover:text-rose-400 hover:border-neutral-700'
+                  : 'border-neutral-200 bg-transparent text-neutral-500 hover:text-rose-500'
+              }`}
+              aria-label="Wishlist"
+            >
+              <Heart size={17} />
+              {totalWishlistItems > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-semibold text-white">
+                  {totalWishlistItems}
+                </span>
+              )}
+            </motion.button>
+
+            {/* Cart */}
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={() => navigate('/cart')}
+              className="relative flex h-9 items-center gap-2 rounded-sm px-3.5 text-white text-xs font-medium transition-all"
+              style={{ background: GOLD, border: 'none' }}
+              aria-label="Cart"
+            >
+              <ShoppingCart size={15} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, letterSpacing: '0.03em' }}>Cart</span>
+              {totalCartItems > 0 && (
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white text-[9px] font-bold" style={{ color: GOLD }}>
+                  {totalCartItems}
+                </span>
+              )}
+            </motion.button>
+
+            {/* Mobile hamburger */}
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={() => setIsOpen(!isOpen)}
+              className={`flex h-9 w-9 items-center justify-center rounded-sm border transition-colors xl:hidden ${
+                darkMode ? 'border-neutral-800 text-neutral-300' : 'border-neutral-200 text-neutral-600'
+              }`}
+              aria-label="Menu"
+            >
+              {isOpen ? <X size={18} /> : <Menu size={18} />}
+            </motion.button>
           </div>
         </div>
-
-        {/* Action buttons */}
-        <div className="flex items-center gap-2">
-          {/* Dark mode toggle */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={toggleTheme}
-            className={`rounded-full p-2 border transition-colors duration-200 ${
-              darkMode
-                ? 'border-slate-800 bg-slate-950 text-amber-300 hover:bg-slate-900'
-                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </motion.button>
-
-          {/* Wishlist */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/wishlist')}
-            className={`relative rounded-full p-2 border transition-colors duration-200 ${
-              darkMode
-                ? 'border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 hover:text-rose-400'
-                : 'border-slate-200 bg-white text-slate-600 hover:bg-rose-50 hover:text-rose-500'
-            }`}
-          >
-            <Heart size={20} />
-            {totalWishlistItems > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-sm">
-                {totalWishlistItems}
-              </span>
-            )}
-          </motion.button>
-
-          {/* Cart */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/cart')}
-            className="relative rounded-full p-2 bg-linear-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-shadow"
-          >
-            <ShoppingCart size={20} />
-            {totalCartItems > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
-                {totalCartItems}
-              </span>
-            )}
-          </motion.button>
-
-          {/* Mobile menu toggle */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setIsOpen(!isOpen)}
-            className={`rounded-full p-2 border transition-colors duration-200 xl:hidden ${
-              darkMode ? 'border-slate-800 bg-slate-950 text-white' : 'border-slate-200 bg-white text-slate-700'
-            }`}
-          >
-            {isOpen ? <X size={22} /> : <Menu size={22} />}
-          </motion.button>
-        </div>
-      </div>
+      </motion.nav>
 
       {/* Mobile drawer */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm xl:hidden"
-            onClick={() => setIsOpen(false)}
-          >
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/40 xl:hidden"
+              onClick={() => setIsOpen(false)}
+            />
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className={`absolute left-0 top-0 h-full w-72 overflow-hidden rounded-r-3xl border-r p-6 shadow-2xl ${
-                darkMode ? 'border-slate-800 bg-slate-950/95' : 'border-slate-200 bg-white/95'
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className={`fixed left-0 top-0 z-50 h-full w-72 border-r flex flex-col xl:hidden ${
+                darkMode ? 'bg-neutral-950 border-neutral-800' : 'bg-white border-neutral-200'
               }`}
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-8">
-                <p className="text-sm font-bold uppercase tracking-widest text-indigo-600">Menu</p>
+              {/* Drawer header */}
+              <div className={`flex items-center justify-between px-6 py-5 border-b ${darkMode ? 'border-neutral-800' : 'border-neutral-100'}`}>
+                <span
+                  className={`text-lg tracking-tight ${darkMode ? 'text-white' : 'text-neutral-900'}`}
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 500 }}
+                >
+                  Prestige
+                </span>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className={`rounded-full p-1.5 ${darkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-100'}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-sm ${darkMode ? 'text-neutral-400 hover:text-white' : 'text-neutral-500 hover:text-neutral-900'}`}
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </div>
 
-              <nav className="space-y-2">
+              {/* Nav links */}
+              <nav className="flex flex-col gap-0.5 px-4 py-4">
                 {navItems.map((item) => (
                   <NavLink
                     key={item.label}
                     to={item.to}
                     onClick={() => setIsOpen(false)}
-                    className={({ isActive }) =>
-                      `block rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                        isActive
-                          ? 'bg-indigo-600 text-white'
-                          : darkMode
-                          ? 'text-slate-300 hover:bg-slate-900'
-                          : 'text-slate-700 hover:bg-slate-100'
-                      }`
-                    }
+                    style={({ isActive }) => ({
+                      display: 'block',
+                      padding: '10px 12px',
+                      fontSize: 14,
+                      fontWeight: isActive ? 500 : 400,
+                      color: isActive ? GOLD : darkMode ? '#d4d4d4' : '#404040',
+                      background: isActive ? (darkMode ? 'rgba(176,125,74,0.08)' : 'rgba(176,125,74,0.06)') : 'transparent',
+                      borderRadius: 2,
+                      textDecoration: 'none',
+                      letterSpacing: '0.02em',
+                    })}
                   >
                     {item.label}
                   </NavLink>
                 ))}
               </nav>
 
-              <div className="mt-6 space-y-2">
+              {/* Bottom actions */}
+              <div className={`mt-auto border-t px-4 py-4 flex flex-col gap-2 ${darkMode ? 'border-neutral-800' : 'border-neutral-100'}`}>
                 <button
                   onClick={() => { navigate('/wishlist'); setIsOpen(false); }}
-                  className={`w-full rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${
-                    darkMode ? 'bg-slate-900 text-slate-100 hover:bg-slate-800' : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
+                  className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-sm text-sm text-left transition-colors ${
+                    darkMode ? 'text-neutral-300 hover:bg-neutral-900' : 'text-neutral-700 hover:bg-neutral-50'
                   }`}
                 >
-                  ❤️ Wishlist {totalWishlistItems > 0 && `(${totalWishlistItems})`}
+                  <Heart size={16} />
+                  Wishlist {totalWishlistItems > 0 && <span className="ml-auto text-rose-500 text-xs font-semibold">{totalWishlistItems}</span>}
                 </button>
                 <button
                   onClick={() => { navigate('/cart'); setIsOpen(false); }}
-                  className="w-full rounded-2xl bg-linear-to-r from-indigo-600 to-purple-600 px-4 py-3 text-left text-sm font-semibold text-white hover:opacity-90"
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-sm text-sm text-left text-white transition-colors"
+                  style={{ background: GOLD }}
                 >
-                  🛒 Cart {totalCartItems > 0 && `(${totalCartItems})`}
+                  <ShoppingCart size={16} />
+                  Cart {totalCartItems > 0 && <span className="ml-auto font-semibold">{totalCartItems}</span>}
                 </button>
               </div>
             </motion.div>
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
-    </motion.nav>
+    </>
   );
 };
 

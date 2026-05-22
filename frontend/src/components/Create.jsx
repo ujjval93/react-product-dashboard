@@ -1,16 +1,28 @@
-import React, { useContext, useState } from 'react'
-import { motion } from 'framer-motion'
-import { Plus, ArrowLeft } from 'lucide-react'
-import { ProductContext } from '../utils/Context'
-import { useNavigate } from 'react-router-dom'
-import { nanoid } from 'nanoid'
-import Navbar from './Navbar'
-import { useDarkMode } from '../hooks/useDarkMode'
+import React, { useContext, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ProductContext } from '../utils/Context';
+import { useNavigate } from 'react-router-dom';
+import { nanoid } from 'nanoid';
+import Navbar from './Navbar';
+import { useDarkMode } from '../hooks/useDarkMode';
+
+const GOLD = '#B07D4A';
+
+const CATEGORIES = [
+  'electronics',
+  "men's clothing",
+  "women's clothing",
+  'jewelery',
+  'accessories',
+  'home & living',
+  'beauty',
+];
 
 const Create = () => {
-  const { addProduct } = useContext(ProductContext)
-  const { darkMode } = useDarkMode()
-  const navigate = useNavigate()
+  const { addProduct } = useContext(ProductContext);
+  const { darkMode } = useDarkMode();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -18,60 +30,31 @@ const Create = () => {
     price: '',
     category: '',
     description: '',
-  })
+  });
 
-  const [errors, setErrors] = useState({})
-  const [submitted, setSubmitted] = useState(false)
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: '',
-      }))
-    }
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+  };
 
   const validateForm = () => {
-    const newErrors = {}
-
-    if (formData.title.trim().length < 5) {
-      newErrors.title = 'Title must be at least 5 characters'
-    }
-
-    if (formData.image.trim().length < 5) {
-      newErrors.image = 'Image URL must be at least 5 characters'
-    }
-
-    if (formData.category.trim().length < 3) {
-      newErrors.category = 'Category must be at least 3 characters'
-    }
-
-    if (formData.description.trim().length < 10) {
-      newErrors.description = 'Description must be at least 10 characters'
-    }
-
-    if (!formData.price || parseFloat(formData.price) <= 0) {
-      newErrors.price = 'Please enter a valid price'
-    }
-
-    return newErrors
-  }
+    const e = {};
+    if (formData.title.trim().length < 5) e.title = 'Title must be at least 5 characters';
+    if (formData.image.trim().length < 5) e.image = 'Please enter a valid image URL';
+    if (formData.category.trim().length < 3) e.category = 'Please select or enter a category';
+    if (formData.description.trim().length < 10) e.description = 'Description must be at least 10 characters';
+    if (!formData.price || parseFloat(formData.price) <= 0) e.price = 'Please enter a valid price';
+    return e;
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-
-    const newErrors = validateForm()
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
+    e.preventDefault();
+    const newErrors = validateForm();
+    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
 
     const product = {
       id: nanoid(),
@@ -80,331 +63,261 @@ const Create = () => {
       category: formData.category,
       price: parseFloat(formData.price),
       description: formData.description,
-    }
+    };
 
-    // Use context's addProduct to save with persistence
-    addProduct(product)
-    setSubmitted(true)
-
+    addProduct(product);
+    setSubmitted(true);
     setTimeout(() => {
-      setFormData({
-        title: '',
-        image: '',
-        price: '',
-        category: '',
-        description: '',
-      })
-      setSubmitted(false)
-      navigate('/')
-    }, 1500)
-  }
+      setFormData({ title: '', image: '', price: '', category: '', description: '' });
+      setSubmitted(false);
+      navigate('/');
+    }, 1600);
+  };
 
-  const containerVariants = {
-    initial: { opacity: 0 },
-    animate: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-    },
-  }
-
-  const itemVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  }
-
-  const inputVariants = {
-    focus: { scale: 1.02, boxShadow: '0 0 0 3px rgba(79, 70, 229, 0.1)' },
-  }
+  const bg = darkMode ? 'bg-neutral-950' : 'bg-neutral-50';
+  const cardBg = darkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200';
+  const textPrimary = darkMode ? 'text-white' : 'text-neutral-900';
+  const textMuted = darkMode ? 'text-neutral-400' : 'text-neutral-500';
+  const inputCls = (fieldName) => `w-full px-3.5 py-2.5 text-sm outline-none border transition-all ${
+    errors[fieldName]
+      ? 'border-rose-400'
+      : darkMode
+      ? 'border-neutral-700 bg-neutral-800 text-white placeholder-neutral-500 focus:border-amber-700'
+      : 'border-neutral-200 bg-white text-neutral-900 placeholder-neutral-400 focus:border-amber-400'
+  }`;
 
   return (
-    <div>
+    <div className={`min-h-screen ${bg}`} style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <Navbar />
 
-      <div className={`min-h-screen py-12 ${
-        darkMode
-          ? 'bg-linear-to-br from-gray-950 via-gray-900 to-gray-850'
-          : 'bg-linear-to-br from-gray-50 via-white to-blue-50'
-      }`}>
-        <div className="max-w-2xl mx-auto px-4">
-          {/* Back Button */}
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/')}
-            className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${
-              darkMode
-                ? 'bg-gray-800 hover:bg-gray-700 text-white'
-                : 'bg-white hover:bg-gray-50 text-gray-900 shadow-sm'
-            }`}
-          >
-            <ArrowLeft size={20} />
-            Back
-          </motion.button>
+      <div className="max-w-5xl mx-auto px-5 sm:px-8 lg:px-10 py-12">
 
-          {/* Form Container */}
-          <motion.div
-            variants={containerVariants}
-            initial="initial"
-            animate="animate"
-            className={`rounded-2xl p-8 shadow-xl ${
-              darkMode
-                ? 'bg-gray-800 border border-gray-700'
-                : 'bg-white border border-gray-200'
-            }`}
+        {/* Back */}
+        <button
+          onClick={() => navigate('/')}
+          className={`flex items-center gap-1.5 text-sm mb-10 transition-colors ${textMuted}`}
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <ArrowLeft size={14} />
+          Back to products
+        </button>
+
+        <div className="grid gap-8 lg:grid-cols-[1fr_280px]">
+
+          {/* Form */}
+          <div
+            className={`border p-8 ${cardBg}`}
+            style={{ borderRadius: 2 }}
           >
             {/* Header */}
-            <motion.div
-              variants={itemVariants}
-              className="mb-8 text-center"
-            >
-              <div className="w-12 h-12 mx-auto mb-4 bg-linear-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center">
-                <Plus size={24} className="text-white" />
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="w-6 h-px block" style={{ background: GOLD }} />
+                <span className="text-xs uppercase tracking-[0.2em]" style={{ color: GOLD, fontSize: 10 }}>New listing</span>
               </div>
-              <h1 className={`text-3xl font-bold mb-2 ${
-                darkMode ? 'text-white' : 'text-gray-900'
-              }`}>
+              <h1
+                className={`text-3xl font-light ${textPrimary}`}
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
                 Add New Product
               </h1>
-              <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                Create and list a new premium product
-              </p>
-            </motion.div>
+              <p className={`mt-1 text-sm ${textMuted}`}>Fill in the details to list a product in the store.</p>
+            </div>
 
-            {/* Success Message */}
-            {submitted && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="mb-6 p-4 bg-green-100 border border-green-200 text-green-700 rounded-lg text-center"
-              >
-                ✓ Product added successfully! Redirecting...
-              </motion.div>
-            )}
+            {/* Success */}
+            <AnimatePresence>
+              {submitted && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-3 mb-6 p-4 text-sm text-green-700 bg-green-50 border border-green-200"
+                  style={{ borderRadius: 1 }}
+                >
+                  <CheckCircle size={16} />
+                  Product added successfully! Redirecting…
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+
               {/* Title */}
-              <motion.div variants={itemVariants}>
-                <label className={`block text-sm font-semibold mb-2 ${
-                  darkMode ? 'text-white' : 'text-gray-900'
-                }`}>
-                  Product Title *
+              <div>
+                <label className={`block text-xs font-medium uppercase tracking-wide mb-1.5 ${textMuted}`} style={{ letterSpacing: '0.08em' }}>
+                  Product title *
                 </label>
-                <motion.input
-                  variants={inputVariants}
-                  whileFocus="focus"
+                <input
                   type="text"
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  placeholder="Enter product title"
-                  className={`w-full px-4 py-3 rounded-lg border transition-all ${
-                    errors.title
-                      ? 'border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:ring-indigo-500'
-                  } ${
-                    darkMode
-                      ? 'bg-gray-700 text-white placeholder-gray-400'
-                      : 'bg-white text-gray-900 placeholder-gray-500'
-                  } focus:outline-none focus:ring-2`}
+                  placeholder="e.g. Premium Leather Watch"
+                  className={inputCls('title')}
+                  style={{ borderRadius: 1 }}
                 />
-                {errors.title && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-1 text-sm text-red-500"
-                  >
-                    {errors.title}
-                  </motion.p>
-                )}
-              </motion.div>
+                {errors.title && <p className="mt-1 text-xs text-rose-500">{errors.title}</p>}
+              </div>
 
               {/* Image URL */}
-              <motion.div variants={itemVariants}>
-                <label className={`block text-sm font-semibold mb-2 ${
-                  darkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+              <div>
+                <label className={`block text-xs font-medium uppercase tracking-wide mb-1.5 ${textMuted}`} style={{ letterSpacing: '0.08em' }}>
                   Image URL *
                 </label>
-                <motion.input
-                  variants={inputVariants}
-                  whileFocus="focus"
+                <input
                   type="url"
                   name="image"
                   value={formData.image}
                   onChange={handleChange}
                   placeholder="https://example.com/image.jpg"
-                  className={`w-full px-4 py-3 rounded-lg border transition-all ${
-                    errors.image
-                      ? 'border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:ring-indigo-500'
-                  } ${
-                    darkMode
-                      ? 'bg-gray-700 text-white placeholder-gray-400'
-                      : 'bg-white text-gray-900 placeholder-gray-500'
-                  } focus:outline-none focus:ring-2`}
+                  className={inputCls('image')}
+                  style={{ borderRadius: 1 }}
                 />
-                {errors.image && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-1 text-sm text-red-500"
-                  >
-                    {errors.image}
-                  </motion.p>
-                )}
-              </motion.div>
+                {errors.image && <p className="mt-1 text-xs text-rose-500">{errors.image}</p>}
+              </div>
 
-              {/* Price and Category */}
-              <motion.div variants={itemVariants} className="grid grid-cols-2 gap-6">
-                {/* Category */}
+              {/* Category + Price */}
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${
-                    darkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
+                  <label className={`block text-xs font-medium uppercase tracking-wide mb-1.5 ${textMuted}`} style={{ letterSpacing: '0.08em' }}>
                     Category *
                   </label>
-                  <motion.input
-                    variants={inputVariants}
-                    whileFocus="focus"
-                    type="text"
+                  <select
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
-                    placeholder="e.g., Electronics"
-                    className={`w-full px-4 py-3 rounded-lg border transition-all ${
-                      errors.category
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-gray-300 focus:ring-indigo-500'
-                    } ${
-                      darkMode
-                        ? 'bg-gray-700 text-white placeholder-gray-400'
-                        : 'bg-white text-gray-900 placeholder-gray-500'
-                    } focus:outline-none focus:ring-2`}
-                  />
-                  {errors.category && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-500"
-                    >
-                      {errors.category}
-                    </motion.p>
-                  )}
+                    className={inputCls('category')}
+                    style={{ borderRadius: 1, appearance: 'none' }}
+                  >
+                    <option value="">Select…</option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                    ))}
+                  </select>
+                  {errors.category && <p className="mt-1 text-xs text-rose-500">{errors.category}</p>}
                 </div>
 
-                {/* Price */}
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${
-                    darkMode ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    Price ($) *
+                  <label className={`block text-xs font-medium uppercase tracking-wide mb-1.5 ${textMuted}`} style={{ letterSpacing: '0.08em' }}>
+                    Price (USD) *
                   </label>
-                  <motion.input
-                    variants={inputVariants}
-                    whileFocus="focus"
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    className={`w-full px-4 py-3 rounded-lg border transition-all ${
-                      errors.price
-                        ? 'border-red-500 focus:ring-red-500'
-                        : 'border-gray-300 focus:ring-indigo-500'
-                    } ${
-                      darkMode
-                        ? 'bg-gray-700 text-white placeholder-gray-400'
-                        : 'bg-white text-gray-900 placeholder-gray-500'
-                    } focus:outline-none focus:ring-2`}
-                  />
-                  {errors.price && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-500"
-                    >
-                      {errors.price}
-                    </motion.p>
-                  )}
+                  <div className="relative">
+                    <span
+                      className={`absolute left-3 top-1/2 -translate-y-1/2 text-sm ${textMuted}`}
+                    >$</span>
+                    <input
+                      type="number"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
+                      className={inputCls('price') + ' pl-7'}
+                      style={{ borderRadius: 1 }}
+                    />
+                  </div>
+                  {errors.price && <p className="mt-1 text-xs text-rose-500">{errors.price}</p>}
                 </div>
-              </motion.div>
+              </div>
 
               {/* Description */}
-              <motion.div variants={itemVariants}>
-                <label className={`block text-sm font-semibold mb-2 ${
-                  darkMode ? 'text-white' : 'text-gray-900'
-                }`}>
+              <div>
+                <label className={`block text-xs font-medium uppercase tracking-wide mb-1.5 ${textMuted}`} style={{ letterSpacing: '0.08em' }}>
                   Description *
                 </label>
-                <motion.textarea
-                  variants={inputVariants}
-                  whileFocus="focus"
+                <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Describe your product in detail..."
-                  rows={6}
-                  className={`w-full px-4 py-3 rounded-lg border transition-all resize-none ${
-                    errors.description
-                      ? 'border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:ring-indigo-500'
-                  } ${
-                    darkMode
-                      ? 'bg-gray-700 text-white placeholder-gray-400'
-                      : 'bg-white text-gray-900 placeholder-gray-500'
-                  } focus:outline-none focus:ring-2`}
+                  placeholder="Describe your product in detail…"
+                  rows={5}
+                  className={inputCls('description') + ' resize-none'}
+                  style={{ borderRadius: 1 }}
                 />
-                {errors.description && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="mt-1 text-sm text-red-500"
-                  >
-                    {errors.description}
-                  </motion.p>
-                )}
-              </motion.div>
+                {errors.description && <p className="mt-1 text-xs text-rose-500">{errors.description}</p>}
+              </div>
 
-              {/* Buttons */}
-              <motion.div
-                variants={itemVariants}
-                className="flex gap-4 pt-6"
-              >
+              {/* Submit */}
+              <div className="flex gap-3 pt-2">
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={submitted}
-                  className="flex-1 py-3 bg-linear-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-indigo-500/50 transition-all disabled:opacity-50"
+                  className="flex-1 py-3 text-sm font-medium text-white uppercase tracking-widest transition-opacity disabled:opacity-60"
+                  style={{ background: GOLD, border: 'none', borderRadius: 1, cursor: 'pointer', letterSpacing: '0.1em' }}
                 >
-                  <Plus size={20} />
-                  {submitted ? 'Adding...' : 'Add Product'}
+                  {submitted ? 'Adding…' : 'List product'}
                 </motion.button>
-
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => navigate('/')}
-                  className={`flex-1 py-3 rounded-lg font-bold transition-all border-2 ${
+                  className={`px-6 py-3 text-sm font-medium border transition-colors ${
                     darkMode
-                      ? 'border-gray-600 text-white hover:bg-gray-700'
-                      : 'border-gray-300 text-gray-900 hover:bg-gray-100'
+                      ? 'border-neutral-700 text-neutral-300 hover:bg-neutral-800'
+                      : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'
                   }`}
+                  style={{ borderRadius: 1 }}
                 >
                   Cancel
                 </motion.button>
-              </motion.div>
+              </div>
             </form>
-          </motion.div>
+          </div>
+
+          {/* Live preview */}
+          <div className="hidden lg:block">
+            <p className={`text-xs uppercase tracking-widest mb-4 ${textMuted}`} style={{ letterSpacing: '0.14em' }}>
+              Preview
+            </p>
+            <div
+              className={`border overflow-hidden ${cardBg}`}
+              style={{ borderRadius: 2 }}
+            >
+              <div
+                className={`flex items-center justify-center ${darkMode ? 'bg-neutral-800' : 'bg-neutral-50'}`}
+                style={{ height: 180 }}
+              >
+                {formData.image ? (
+                  <img
+                    src={formData.image}
+                    alt="Preview"
+                    className="h-full w-full object-contain p-5"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                ) : (
+                  <span className={`text-xs ${textMuted}`}>Image preview</span>
+                )}
+              </div>
+
+              <div className="p-4">
+                <p className="text-xs uppercase mb-1" style={{ color: GOLD, letterSpacing: '0.14em', fontSize: 10 }}>
+                  {formData.category || 'Category'}
+                </p>
+                <h3
+                  className={`text-sm line-clamp-2 mb-2 ${textPrimary}`}
+                  style={{ fontSize: 13, fontWeight: 400 }}
+                >
+                  {formData.title || 'Product title will appear here'}
+                </h3>
+                <p
+                  className="font-medium"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, color: GOLD }}
+                >
+                  {formData.price ? `$${parseFloat(formData.price).toFixed(2)}` : '$0.00'}
+                </p>
+              </div>
+            </div>
+
+            <p className={`mt-3 text-xs ${textMuted}`}>
+              Preview updates as you type.
+            </p>
+          </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Create
+export default Create;

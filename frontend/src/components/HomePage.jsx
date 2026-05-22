@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Filter, Search, Mail } from 'lucide-react';
+import { SlidersHorizontal, Search, ChevronDown, Mail, ArrowRight } from 'lucide-react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import ProductCard from './ProductCard';
@@ -9,6 +9,8 @@ import HeroSection from './HeroSection';
 import FeaturesSection from './FeaturesSection';
 import { ProductContext } from '../utils/Context';
 import { useDarkMode } from '../hooks/useDarkMode';
+
+const GOLD = '#B07D4A';
 
 const priceRanges = [
   { label: 'All', value: [0, Number.POSITIVE_INFINITY] },
@@ -25,6 +27,19 @@ const sortOptions = [
   'Price: High to Low',
   'Best Sellers',
 ];
+
+const SOCIAL = [
+  { label: 'TW', href: '#' },
+  { label: 'FB', href: '#' },
+  { label: 'IG', href: '#' },
+  { label: 'LI', href: '#' },
+];
+
+const FOOTER_LINKS = {
+  Explore: ['Products', 'Categories', 'Brands', 'Gift Cards'],
+  Support: ['Contact Us', 'FAQ', 'Returns', 'Shipping Policy'],
+  Company: ['About Us', 'Careers', 'Press', 'Sustainability'],
+};
 
 const HomePage = () => {
   const { products, loading: productsLoading, categories } = useContext(ProductContext);
@@ -48,24 +63,25 @@ const HomePage = () => {
     let filtered = [...products];
 
     if (selectedCategory !== 'All') {
-      filtered = filtered.filter((product) => product.category === selectedCategory);
+      filtered = filtered.filter((p) => p.category === selectedCategory);
     }
 
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((product) =>
-        product.title?.toLowerCase().includes(query) || product.description?.toLowerCase().includes(query),
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (p) => p.title?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q),
       );
     }
 
-    const range = priceRanges.find((rangeOption) => rangeOption.label === selectedPriceRange)?.value || [0, Number.POSITIVE_INFINITY];
-    filtered = filtered.filter((product) => {
-      const price = Number(product.price) || 0;
+    const range =
+      priceRanges.find((r) => r.label === selectedPriceRange)?.value || [0, Infinity];
+    filtered = filtered.filter((p) => {
+      const price = Number(p.price) || 0;
       return price >= range[0] && price <= range[1];
     });
 
     if (minRating > 0) {
-      filtered = filtered.filter((product) => Number(product.rating?.rate || 0) >= minRating);
+      filtered = filtered.filter((p) => Number(p.rating?.rate || 0) >= minRating);
     }
 
     switch (sortOption) {
@@ -96,179 +112,390 @@ const HomePage = () => {
     setSortOption('Latest');
   };
 
-  const containerVariants = {
-    initial: { opacity: 0 },
-    animate: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-    },
-  };
+  const activeFilterCount = [
+    selectedCategory !== 'All',
+    selectedPriceRange !== 'All',
+    minRating > 0,
+  ].filter(Boolean).length;
+
+  const bg = darkMode ? 'bg-neutral-950' : 'bg-neutral-50';
+  const textPrimary = darkMode ? 'text-white' : 'text-neutral-900';
+  const textMuted = darkMode ? 'text-neutral-400' : 'text-neutral-500';
+  const cardBorder = darkMode ? 'border-neutral-800' : 'border-neutral-200';
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-slate-950 text-white' : 'bg-white text-slate-900'}`}>
+    <div
+      className={`min-h-screen ${bg} ${textPrimary}`}
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
+    >
       <Navbar />
       <HeroSection />
 
-      <section className={`py-16 ${darkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <p className="text-sm uppercase tracking-[0.35em] text-indigo-500">Featured Collection</p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Elegant products for modern lifestyles
-            </h2>
-            <p className={`mt-3 max-w-2xl text-base leading-8 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-              Browse premium items with refined details, smooth interactions, and production-ready polish.
-            </p>
-          </motion.div>
+      {/* ── Products Section ── */}
+      <section className={`py-20 ${bg}`}>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
 
+          {/* Section header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-10 flex flex-col gap-4 rounded-3xl border px-5 py-5 shadow-sm transition-all duration-300 sm:flex-row sm:items-center sm:justify-between lg:px-7 lg:py-6"
+            transition={{ duration: 0.5 }}
+            className="mb-10"
           >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="block w-6 h-px" style={{ background: GOLD }} />
+              <span
+                className="text-xs uppercase font-medium"
+                style={{ color: GOLD, letterSpacing: '0.2em', fontSize: 10 }}
+              >
+                Featured Collection
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <h2
+                className={`text-3xl sm:text-4xl font-light tracking-tight ${textPrimary}`}
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                Elegant products for modern living
+              </h2>
+              <p className={`text-sm max-w-sm ${textMuted}`} style={{ fontSize: 13 }}>
+                {products.length} premium items across {categories.length - 1} categories
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Filter & search bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8 px-4 py-3.5 border ${cardBorder} ${darkMode ? 'bg-neutral-900' : 'bg-white'}`}
+            style={{ borderRadius: 2 }}
+          >
+            {/* Left: filter + search */}
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-indigo-500"
+                className={`flex items-center gap-2 px-3.5 py-2 text-xs uppercase tracking-widest border transition-colors ${
+                  activeFilterCount > 0
+                    ? 'text-white border-transparent'
+                    : darkMode
+                    ? `border-neutral-700 ${textMuted} hover:border-neutral-500`
+                    : `border-neutral-200 ${textMuted} hover:border-neutral-400`
+                }`}
+                style={{
+                  background: activeFilterCount > 0 ? GOLD : 'transparent',
+                  borderRadius: 1,
+                  letterSpacing: '0.1em',
+                  cursor: 'pointer',
+                  fontFamily: "'DM Sans', sans-serif",
+                }}
               >
-                <Filter size={18} />
-                Filters
+                <SlidersHorizontal size={13} />
+                Filters{activeFilterCount > 0 ? ` · ${activeFilterCount}` : ''}
               </button>
 
-              <div className={`flex items-center rounded-full border px-4 py-2 shadow-sm transition ${
-                darkMode ? 'border-slate-800 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-900'
-              }`}>
-                <Search size={18} className={darkMode ? 'text-slate-500' : 'text-slate-400'} />
+              <div
+                className={`flex items-center gap-2 border px-3 py-2 transition-colors ${
+                  darkMode ? 'border-neutral-700 bg-transparent' : 'border-neutral-200 bg-transparent'
+                }`}
+                style={{ borderRadius: 1, minWidth: 200 }}
+              >
+                <Search size={13} className={textMuted} />
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search premium goods"
-                  className="ml-3 w-full bg-transparent text-sm outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  placeholder="Search products…"
+                  className={`w-full bg-transparent text-xs outline-none ${textMuted}`}
+                  style={{ fontFamily: "'DM Sans', sans-serif" }}
                 />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className={`text-xs ${textMuted} hover:${textPrimary}`}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    ×
+                  </button>
+                )}
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Showing {visibleProducts.length} of {products.length} products
-                </span>
+            {/* Right: count + sort */}
+            <div className="flex items-center gap-4">
+              <span className={`text-xs ${textMuted}`}>
+                {visibleProducts.length} of {products.length} items
+              </span>
+              <div className="relative">
                 <select
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
-                  className={`rounded-full border px-4 py-3 text-sm transition ${
-                    darkMode ? 'border-slate-800 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-900'
+                  className={`appearance-none text-xs pr-7 pl-3 py-2 border transition-colors ${
+                    darkMode
+                      ? `border-neutral-700 bg-neutral-900 ${textPrimary}`
+                      : `border-neutral-200 bg-white ${textPrimary}`
                   }`}
+                  style={{ borderRadius: 1, fontFamily: "'DM Sans', sans-serif", cursor: 'pointer' }}
                 >
-                  {sortOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
+                  {sortOptions.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
                   ))}
                 </select>
+                <ChevronDown
+                  size={12}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${textMuted}`}
+                />
               </div>
             </div>
           </motion.div>
 
-          {loading ? (
-            <SkeletonLoader count={10} columns={5} />
-          ) : (
+          {/* Active filter chips */}
+          {(selectedCategory !== 'All' || selectedPriceRange !== 'All' || minRating > 0) && (
             <motion.div
-              variants={containerVariants}
-              initial="initial"
-              whileInView="animate"
-              viewport={{ once: true }}
-              className="grid gap-8 grid-cols-2 md:grid-cols-3 xl:grid-cols-5"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="flex flex-wrap gap-2 mb-6"
             >
-              {visibleProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {selectedCategory !== 'All' && (
+                <button
+                  onClick={() => setSelectedCategory('All')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs border transition-colors"
+                  style={{
+                    background: darkMode ? 'rgba(176,125,74,0.1)' : 'rgba(176,125,74,0.07)',
+                    border: 'none',
+                    borderRadius: 1,
+                    color: GOLD,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {selectedCategory} ×
+                </button>
+              )}
+              {selectedPriceRange !== 'All' && (
+                <button
+                  onClick={() => setSelectedPriceRange('All')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs"
+                  style={{
+                    background: darkMode ? 'rgba(176,125,74,0.1)' : 'rgba(176,125,74,0.07)',
+                    border: 'none',
+                    borderRadius: 1,
+                    color: GOLD,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {selectedPriceRange} ×
+                </button>
+              )}
+              {minRating > 0 && (
+                <button
+                  onClick={() => setMinRating(0)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs"
+                  style={{
+                    background: darkMode ? 'rgba(176,125,74,0.1)' : 'rgba(176,125,74,0.07)',
+                    border: 'none',
+                    borderRadius: 1,
+                    color: GOLD,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {minRating}★ & up ×
+                </button>
+              )}
+              <button
+                onClick={handleClearFilters}
+                className={`px-3 py-1.5 text-xs ${textMuted} hover:${textPrimary}`}
+                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                Clear all
+              </button>
             </motion.div>
           )}
 
-          {visibleProducts.length === 0 && !loading && (
-            <div className="mt-12 rounded-3xl border border-dashed border-slate-300 bg-white/80 p-10 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
-              <p className="text-lg font-semibold text-slate-900 dark:text-white">No products match your filters.</p>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Try adjusting search, category, or price range.</p>
+          {/* Products grid */}
+          {loading ? (
+            <SkeletonLoader count={10} columns={5} />
+          ) : visibleProducts.length > 0 ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="grid gap-4 grid-cols-2 md:grid-cols-3 xl:grid-cols-5"
+            >
+              {visibleProducts.map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.35, delay: Math.min(i * 0.04, 0.4) }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            /* Empty state */
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className={`mt-4 border border-dashed p-14 text-center ${cardBorder}`}
+              style={{ borderRadius: 2 }}
+            >
+              <div
+                className="w-10 h-10 mx-auto mb-4 flex items-center justify-center"
+                style={{ background: darkMode ? 'rgba(176,125,74,0.1)' : 'rgba(176,125,74,0.08)', borderRadius: 1 }}
+              >
+                <Search size={18} style={{ color: GOLD }} />
+              </div>
+              <p className={`text-base font-light mb-1 ${textPrimary}`} style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20 }}>
+                No products found
+              </p>
+              <p className={`text-xs mb-6 ${textMuted}`}>
+                Try adjusting your search, category, or price range.
+              </p>
               <button
                 onClick={handleClearFilters}
-                className="mt-6 rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500"
+                className="px-6 py-2.5 text-xs font-medium text-white uppercase tracking-widest"
+                style={{ background: GOLD, border: 'none', borderRadius: 1, cursor: 'pointer', letterSpacing: '0.1em' }}
               >
                 Clear filters
               </button>
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
 
       <FeaturesSection />
 
-      <footer className={`${darkMode ? 'bg-slate-950 text-slate-300' : 'bg-slate-900 text-slate-100'}`}>
-        <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr_1fr_1.3fr]">
-            <div className="space-y-6">
-              <h3 className="text-2xl font-semibold text-white">Prestige</h3>
-              <p className="max-w-md text-sm leading-7 text-slate-400">
-                A premium ecommerce experience with polished interactions, elegant typography, and beautiful visual polish for modern brands.
+      {/* ── Footer ── */}
+      <footer
+        className={`${darkMode ? 'bg-neutral-900 text-neutral-300' : 'bg-neutral-950 text-neutral-300'}`}
+        style={{ fontFamily: "'DM Sans', sans-serif" }}
+      >
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-16 pb-10">
+
+          <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr_1fr_1fr_1.4fr]">
+
+            {/* Brand column */}
+            <div className="space-y-5">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="flex h-8 w-8 items-center justify-center text-white text-sm"
+                  style={{ background: GOLD, borderRadius: 1, fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontWeight: 500 }}
+                >
+                  P
+                </div>
+                <span
+                  className="text-xl text-white"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 400 }}
+                >
+                  Prestige
+                </span>
+              </div>
+
+              <p className="text-sm leading-7 text-neutral-500 max-w-xs" style={{ fontSize: 13 }}>
+                A curated ecommerce experience built for discerning shoppers who value quality, design, and authenticity.
               </p>
-              <div className="flex items-center gap-3">
-                {['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].map((name) => (
-                  <span key={name} className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-slate-200 transition hover:bg-white/20">
-                    {name.charAt(0)}
-                  </span>
+
+              {/* Social */}
+              <div className="flex items-center gap-2">
+                {SOCIAL.map(({ label, href }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    className="flex h-8 w-8 items-center justify-center text-xs font-medium text-neutral-400 border border-neutral-800 transition-colors hover:border-neutral-600 hover:text-white"
+                    style={{ borderRadius: 1 }}
+                  >
+                    {label}
+                  </a>
                 ))}
               </div>
             </div>
 
-            <div>
-              <h4 className="text-base font-semibold text-white">Explore</h4>
-              <ul className="mt-6 space-y-3 text-sm text-slate-400">
-                <li>Products</li>
-                <li>Categories</li>
-                <li>Brands</li>
-                <li>Gift Cards</li>
-              </ul>
-            </div>
+            {/* Link columns */}
+            {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
+              <div key={heading}>
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="w-4 h-px" style={{ background: GOLD }} />
+                  <h4
+                    className="text-xs uppercase font-medium text-white"
+                    style={{ letterSpacing: '0.14em', fontSize: 10 }}
+                  >
+                    {heading}
+                  </h4>
+                </div>
+                <ul className="space-y-3">
+                  {links.map((link) => (
+                    <li key={link}>
+                      <a
+                        href="#"
+                        className="text-xs text-neutral-500 hover:text-neutral-200 transition-colors"
+                        style={{ fontSize: 13 }}
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
 
+            {/* Newsletter */}
             <div>
-              <h4 className="text-base font-semibold text-white">Support</h4>
-              <ul className="mt-6 space-y-3 text-sm text-slate-400">
-                <li>Contact Us</li>
-                <li>FAQ</li>
-                <li>Returns</li>
-                <li>Shipping</li>
-              </ul>
-            </div>
-
-            <div className="rounded-4xl border border-white/10 bg-white/5 p-6">
-              <h4 className="text-base font-semibold text-white">Subscribe</h4>
-              <p className="mt-3 text-sm text-slate-400">
-                Join our newsletter for early access to new drops and exclusive promotions.
+              <div className="flex items-center gap-2 mb-5">
+                <span className="w-4 h-px" style={{ background: GOLD }} />
+                <h4
+                  className="text-xs uppercase font-medium text-white"
+                  style={{ letterSpacing: '0.14em', fontSize: 10 }}
+                >
+                  Newsletter
+                </h4>
+              </div>
+              <p className="text-xs text-neutral-500 mb-5 leading-relaxed" style={{ fontSize: 13 }}>
+                Early access to new arrivals, exclusive drops, and members-only offers.
               </p>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <div className="flex flex-1 items-center gap-2 rounded-full border border-white/10 bg-slate-950/80 px-4 py-3">
-                  <Mail size={18} className="text-slate-300" />
+              <div
+                className="flex items-center border border-neutral-800 overflow-hidden"
+                style={{ borderRadius: 1 }}
+              >
+                <div className="flex-1 flex items-center gap-2 px-3 py-2.5">
+                  <Mail size={13} className="text-neutral-600 flex-shrink-0" />
                   <input
                     type="email"
-                    placeholder="Email address"
-                    className="w-full bg-transparent text-sm outline-none placeholder:text-slate-500"
+                    placeholder="Your email"
+                    className="w-full bg-transparent text-xs outline-none text-neutral-300 placeholder-neutral-600"
+                    style={{ fontFamily: "'DM Sans', sans-serif" }}
                   />
                 </div>
-                <button className="inline-flex items-center justify-center rounded-full bg-linear-to-r from-indigo-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:-translate-y-0.5">
-                  Subscribe
+                <button
+                  className="flex items-center justify-center h-full px-3 py-2.5 text-white flex-shrink-0 transition-opacity hover:opacity-80"
+                  style={{ background: GOLD, border: 'none', cursor: 'pointer' }}
+                  aria-label="Subscribe"
+                >
+                  <ArrowRight size={14} />
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="mt-12 border-t border-white/10 pt-8 text-sm text-slate-500">
-            <p>© 2024 Prestige. Crafted for premium ecommerce experiences.</p>
+          {/* Bottom bar */}
+          <div className={`mt-12 pt-6 border-t border-neutral-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3`}>
+            <p className="text-xs text-neutral-600">
+              © {new Date().getFullYear()} Prestige. All rights reserved.
+            </p>
+            <div className="flex items-center gap-5">
+              {['Privacy Policy', 'Terms', 'Cookies'].map((item) => (
+                <a
+                  key={item}
+                  href="#"
+                  className="text-xs text-neutral-600 hover:text-neutral-400 transition-colors"
+                >
+                  {item}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </footer>

@@ -1,102 +1,115 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, Award, Zap, Globe } from 'lucide-react';
+import { Truck, ShieldCheck, RotateCcw, Award } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
+
+const GOLD = '#B07D4A';
+
+const features = [
+  {
+    icon: Award,
+    title: 'Premium Quality',
+    description: 'Hand-picked products from globally trusted brands, verified before every listing.',
+  },
+  {
+    icon: Truck,
+    title: 'Fast Delivery',
+    description: 'Free 2–3 day shipping on all orders over $50, tracked from door to door.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Guaranteed Authentic',
+    description: 'Every product is quality-checked and backed by our authenticity guarantee.',
+  },
+  {
+    icon: RotateCcw,
+    title: 'Easy Returns',
+    description: '30-day hassle-free returns. No questions asked, full refund every time.',
+  },
+];
 
 const FeaturesSection = () => {
   const { darkMode } = useDarkMode();
 
-  const features = [
-    {
-      icon: TrendingUp,
-      title: 'Premium Quality',
-      description: 'Hand-picked products from trusted brands',
-    },
-    {
-      icon: Award,
-      title: 'Best Prices',
-      description: 'Guaranteed lowest prices with price match',
-    },
-    {
-      icon: Zap,
-      title: 'Fast Shipping',
-      description: 'Free shipping on orders over $50',
-    },
-    {
-      icon: Globe,
-      title: 'Global Selection',
-      description: 'Shop from thousands of worldwide sellers',
-    },
-  ];
-
-  const containerVariants = {
-    initial: { opacity: 0 },
-    animate: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2, delayChildren: 0.1 },
-    },
-  };
-
-  const itemVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  };
-
   return (
-    <motion.section
-      variants={containerVariants}
-      initial="initial"
-      whileInView="animate"
-      viewport={{ once: true }}
-      className={`py-16 ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}
+    <section
+      className={`py-20 border-t ${darkMode ? 'bg-neutral-950 border-neutral-800' : 'bg-white border-neutral-100'}`}
+      style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
-      <div className="max-w-7xl mx-auto px-4">
-        <motion.h2
-          variants={itemVariants}
-          className={`text-4xl font-bold text-center mb-12 ${
-            darkMode ? 'text-white' : 'text-gray-900'
-          }`}
-        >
-          Why Choose Prestige?
-        </motion.h2>
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
 
+        {/* Header */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-          variants={containerVariants}
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mb-14"
         >
+          <div className="flex items-center gap-3 mb-3">
+            <span className="block w-6 h-px" style={{ background: GOLD }} />
+            <span
+              className="text-xs uppercase tracking-[0.2em] font-medium"
+              style={{ color: GOLD }}
+            >
+              Why Prestige
+            </span>
+          </div>
+          <h2
+            className={`text-3xl sm:text-4xl font-light tracking-tight ${darkMode ? 'text-white' : 'text-neutral-900'}`}
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+          >
+            Built around your experience
+          </h2>
+        </motion.div>
+
+        {/* Features grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
               <motion.div
-                key={index}
-                variants={itemVariants}
-                whileHover={{ y: -8 }}
-                className={`p-8 rounded-2xl text-center transition-all duration-300 ${
-                  darkMode
-                    ? 'bg-gray-800 hover:shadow-lg hover:shadow-indigo-500/20'
-                    : 'bg-white hover:shadow-lg hover:shadow-indigo-500/10'
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: index * 0.1 }}
+                className={`flex flex-col gap-4 p-8 border-r last:border-r-0 border-b sm:border-b-0 ${
+                  darkMode ? 'border-neutral-800' : 'border-neutral-100'
                 }`}
               >
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 10 }}
-                  className="w-16 h-16 mx-auto mb-4 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center"
+                {/* Icon */}
+                <div
+                  className="flex h-10 w-10 items-center justify-center"
+                  style={{ background: darkMode ? 'rgba(176,125,74,0.1)' : 'rgba(176,125,74,0.08)', borderRadius: 2 }}
                 >
-                  <Icon size={28} className="text-white" />
-                </motion.div>
-                <h3 className={`text-lg font-bold mb-2 ${
-                  darkMode ? 'text-white' : 'text-gray-900'
-                }`}>
-                  {feature.title}
-                </h3>
-                <p className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                  {feature.description}
-                </p>
+                  <Icon size={20} style={{ color: GOLD }} />
+                </div>
+
+                {/* Divider */}
+                <div className="w-8 h-px" style={{ background: GOLD, opacity: 0.5 }} />
+
+                {/* Text */}
+                <div>
+                  <h3
+                    className={`text-base font-medium mb-2 ${darkMode ? 'text-white' : 'text-neutral-900'}`}
+                    style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18 }}
+                  >
+                    {feature.title}
+                  </h3>
+                  <p
+                    className={`text-sm leading-relaxed ${darkMode ? 'text-neutral-400' : 'text-neutral-500'}`}
+                    style={{ fontSize: 13 }}
+                  >
+                    {feature.description}
+                  </p>
+                </div>
               </motion.div>
             );
           })}
-        </motion.div>
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 };
 

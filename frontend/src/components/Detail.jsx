@@ -1,23 +1,27 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Heart, ShoppingCart, Star, Truck, Shield, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Heart, ShoppingCart, Star, Truck, ShieldCheck, RotateCcw, Package } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 import Navbar from './Navbar';
 import SkeletonLoader from './SkeletonLoader';
 import axios from '../utils/axios';
 import { ProductContext } from '../utils/Context';
 
-const detailFeatures = [
-  { icon: Truck, label: 'Free Shipping' },
-  { icon: Shield, label: '100% Authentic' },
-  { icon: RotateCcw, label: 'Easy Returns' },
+const GOLD = '#B07D4A';
+
+const badges = [
+  { icon: Truck, label: 'Free Shipping', sub: 'Orders over $50' },
+  { icon: ShieldCheck, label: '100% Authentic', sub: 'Verified product' },
+  { icon: RotateCcw, label: 'Easy Returns', sub: '30-day policy' },
+  { icon: Package, label: 'Secure Packing', sub: 'Damage-free delivery' },
 ];
 
 const Detail = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
   const { id } = useParams();
   const { darkMode } = useDarkMode();
   const navigate = useNavigate();
@@ -26,49 +30,43 @@ const Detail = () => {
   const getSingleProduct = async () => {
     setLoading(true);
     try {
-      // First, check if product exists in context (for locally created products)
       const contextProduct = products.find((p) => String(p.id) === String(id));
-      if (contextProduct) {
-        setProduct(contextProduct);
-        setLoading(false);
-        return;
-      }
-
-      // If not found in context, try to fetch from API
+      if (contextProduct) { setProduct(contextProduct); setLoading(false); return; }
       const { data } = await axios.get(`/products/${id}`);
       setProduct(data);
     } catch (error) {
-      console.error('Detail load failed', error);
       setProduct(null);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (id) getSingleProduct();
-  }, [id, products]);
+  useEffect(() => { if (id) getSingleProduct(); }, [id, products]);
 
   const handleAddToCart = () => {
     if (!product) return;
     addToCart(product, quantity);
-  };
-
-  const handleToggleWishlist = () => {
-    if (!product) return;
-    toggleWishlist(product);
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 1500);
   };
 
   const isWishlisted = product ? wishlist.some((item) => item.id === product.id) : false;
+  const discount = product ? ((product.id * 7 + 10) % 24) + 10 : 15;
+  const rating = Number(product?.rating?.rate || 4.2).toFixed(1);
+  const reviews = product?.rating?.count || 120;
+
+  const bg = darkMode ? 'bg-neutral-950' : 'bg-neutral-50';
+  const textPrimary = darkMode ? 'text-white' : 'text-neutral-900';
+  const textMuted = darkMode ? 'text-neutral-400' : 'text-neutral-500';
+  const cardBg = darkMode ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200';
+  const divider = darkMode ? 'border-neutral-800' : 'border-neutral-100';
 
   if (loading) {
     return (
-      <div>
+      <div className={`min-h-screen ${bg}`}>
         <Navbar />
-        <div className={`min-h-screen ${darkMode ? 'bg-slate-950' : 'bg-white'} py-12`}>
-          <div className="max-w-7xl mx-auto px-4">
-            <SkeletonLoader count={1} columns={2} />
-          </div>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-12">
+          <SkeletonLoader count={1} columns={2} />
         </div>
       </div>
     );
@@ -76,176 +74,227 @@ const Detail = () => {
 
   if (!product) {
     return (
-      <div>
+      <div className={`min-h-screen ${bg} flex items-center justify-center`} style={{ fontFamily: "'DM Sans', sans-serif" }}>
         <Navbar />
-        <div className={`min-h-screen flex items-center justify-center ${darkMode ? 'bg-slate-950' : 'bg-white'}`}>
-          <div className="text-center px-4">
-            <h1 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-              Product Not Found
-            </h1>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate('/')}
-              className="bg-linear-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold"
-            >
-              Back to Products
-            </motion.button>
-          </div>
+        <div className="text-center">
+          <h1 className={`text-2xl font-light mb-4 ${textPrimary}`} style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            Product not found
+          </h1>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-2.5 text-sm text-white"
+            style={{ background: GOLD, border: 'none', borderRadius: 1, cursor: 'pointer' }}
+          >
+            Back to products
+          </button>
         </div>
       </div>
     );
   }
 
-  const rating = Number(product.rating?.rate || 4.2).toFixed(1);
-  const reviews = product.rating?.count || Math.floor(Math.random() * 500) + 50;
-
-  const containerVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.1 } },
-  };
-
-  const itemVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-  };
-
   return (
-    <div>
+    <div className={`min-h-screen ${bg}`} style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <Navbar />
-      <div className={`min-h-screen ${darkMode ? 'bg-slate-950' : 'bg-white'} py-12`}>
-        <div className="max-w-7xl mx-auto px-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/')}
-            className={`flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all ${
-              darkMode ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-900'
-            }`}
-          >
-            <ArrowLeft size={20} />
-            Back to Products
-          </motion.button>
 
-          <motion.div variants={containerVariants} initial="initial" animate="animate" className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-            <motion.div
-              variants={itemVariants}
-              className={`relative flex items-center justify-center rounded-2xl overflow-hidden p-8 ${
-                darkMode ? 'bg-slate-900' : 'bg-slate-50'
-              }`}
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-12">
+
+        {/* Back */}
+        <button
+          onClick={() => navigate('/')}
+          className={`flex items-center gap-1.5 text-sm mb-10 transition-colors ${textMuted}`}
+          style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <ArrowLeft size={14} />
+          Back to products
+        </button>
+
+        {/* Main grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="grid gap-10 lg:grid-cols-2"
+        >
+          {/* Left — Image */}
+          <div className="relative">
+            <div
+              className={`relative flex items-center justify-center overflow-hidden border ${cardBg}`}
+              style={{ borderRadius: 2, minHeight: 420 }}
             >
               <motion.img
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
+                initial={{ scale: 0.92, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5 }}
-                src={product.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=500&fit=crop'}
+                src={product.image}
                 alt={product.title}
-                className="w-full h-full max-h-96 object-contain"
+                className="w-full max-h-96 object-contain p-10"
               />
-              <motion.div
-                initial={{ x: -40, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                className="absolute top-8 right-8 rounded-full bg-red-500 px-4 py-2 text-lg font-bold text-white"
+              {/* Discount badge */}
+              <div
+                className="absolute top-5 right-5 px-2.5 py-1 text-xs font-medium text-white"
+                style={{ background: GOLD, borderRadius: 1, letterSpacing: '0.06em' }}
               >
-                -{Math.floor(Math.random() * 30) + 5}%
-              </motion.div>
-            </motion.div>
+                -{discount}% OFF
+              </div>
+            </div>
 
-            <motion.div variants={itemVariants} className="space-y-6">
-              <span className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold ${
-                darkMode ? 'bg-indigo-900/30 text-indigo-300' : 'bg-indigo-100 text-indigo-700'
-              }`}>
+            {/* Thumbnails placeholder (same image shown 3x for UX completeness) */}
+            <div className="flex gap-2 mt-3">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`flex-1 flex items-center justify-center border cursor-pointer transition-colors ${
+                    i === 0 ? (darkMode ? 'border-amber-700' : 'border-amber-400') : cardBg
+                  }`}
+                  style={{ height: 60, borderRadius: 1 }}
+                >
+                  <img src={product.image} alt="" className="h-full w-full object-contain p-2" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right — Info */}
+          <div className="flex flex-col gap-5">
+            {/* Category + title */}
+            <div>
+              <p
+                className="text-xs uppercase mb-2"
+                style={{ color: GOLD, letterSpacing: '0.18em', fontSize: 10 }}
+              >
                 {product.category}
-              </span>
-
-              <motion.h1 variants={itemVariants} className={`text-4xl font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              </p>
+              <h1
+                className={`text-3xl sm:text-4xl font-light leading-tight ${textPrimary}`}
+                style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 300 }}
+              >
                 {product.title}
-              </motion.h1>
+              </h1>
+            </div>
 
-              <motion.div variants={itemVariants} className="flex items-center gap-4">
-                <div className="flex items-center gap-1 text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={20} className={i < Math.floor(rating) ? 'fill-current' : 'text-slate-300'} />
-                  ))}
+            {/* Rating */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={14}
+                    style={{
+                      fill: i < Math.floor(Number(rating)) ? '#F59E0B' : 'none',
+                      color: i < Math.floor(Number(rating)) ? '#F59E0B' : (darkMode ? '#525252' : '#d4d4d4'),
+                    }}
+                  />
+                ))}
+              </div>
+              <span className={`text-sm ${textMuted}`}>{rating} · {reviews} reviews</span>
+            </div>
+
+            {/* Price */}
+            <div className={`flex items-baseline gap-3 pb-5 border-b ${divider}`}>
+              <span
+                className="text-4xl font-light"
+                style={{ fontFamily: "'Cormorant Garamond', serif", color: GOLD }}
+              >
+                ${(product.price || 99.99).toFixed(2)}
+              </span>
+              <span className={`text-lg line-through ${textMuted}`}>
+                ${(product.price * (1 + discount / 100)).toFixed(2)}
+              </span>
+              <span className="text-sm text-green-500 font-medium">
+                Save {discount}%
+              </span>
+            </div>
+
+            {/* Description */}
+            <p className={`text-sm leading-relaxed ${textMuted}`} style={{ fontSize: 13 }}>
+              {product.description}
+            </p>
+
+            {/* Quantity + actions */}
+            <div className={`pt-4 border-t ${divider}`}>
+              <div className="flex items-center gap-4 mb-5">
+                <span className={`text-xs uppercase tracking-widest ${textMuted}`} style={{ letterSpacing: '0.1em' }}>
+                  Qty
+                </span>
+                <div
+                  className={`flex items-center border ${darkMode ? 'border-neutral-700' : 'border-neutral-200'}`}
+                  style={{ borderRadius: 1 }}
+                >
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className={`w-9 h-9 flex items-center justify-center text-lg font-light transition-colors ${darkMode ? 'hover:bg-neutral-800 text-neutral-300' : 'hover:bg-neutral-50 text-neutral-600'}`}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+                  >−</button>
+                  <span
+                    className={`w-10 text-center text-sm font-medium border-x ${textPrimary} ${darkMode ? 'border-neutral-700' : 'border-neutral-200'}`}
+                    style={{ lineHeight: '36px' }}
+                  >
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className={`w-9 h-9 flex items-center justify-center text-lg font-light transition-colors ${darkMode ? 'hover:bg-neutral-800 text-neutral-300' : 'hover:bg-neutral-50 text-neutral-600'}`}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+                  >+</button>
                 </div>
-                <span className={darkMode ? 'text-slate-400' : 'text-slate-600'}>({reviews} reviews)</span>
-              </motion.div>
+              </div>
 
-              <motion.div variants={itemVariants} className="flex items-center gap-4">
-                <span className="text-5xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  ${(product.price || 99.99).toFixed(2)}
-                </span>
-                <span className={`text-xl line-through ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>
-                  ${(product.price * 1.3).toFixed(2)}
-                </span>
-              </motion.div>
+              <div className="flex gap-3">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleAddToCart}
+                  className="flex-1 flex items-center justify-center gap-2 py-3.5 text-sm font-medium text-white uppercase tracking-widest transition-colors"
+                  style={{
+                    background: addedToCart ? '#22c55e' : GOLD,
+                    border: 'none',
+                    borderRadius: 1,
+                    cursor: 'pointer',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  <ShoppingCart size={15} />
+                  {addedToCart ? '✓ Added to cart' : 'Add to cart'}
+                </motion.button>
 
-              <motion.p variants={itemVariants} className={`text-lg leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                {product.description}
-              </motion.p>
+                <motion.button
+                  whileTap={{ scale: 0.92 }}
+                  onClick={() => toggleWishlist(product)}
+                  className={`flex h-12 w-12 items-center justify-center border transition-colors ${
+                    isWishlisted
+                      ? 'bg-rose-500 border-rose-500 text-white'
+                      : darkMode
+                      ? 'border-neutral-700 text-neutral-400 hover:text-rose-400 hover:border-rose-500/50'
+                      : 'border-neutral-200 text-neutral-400 hover:text-rose-500 hover:border-rose-200'
+                  }`}
+                  style={{ borderRadius: 1 }}
+                  aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                >
+                  <Heart size={17} fill={isWishlisted ? 'currentColor' : 'none'} />
+                </motion.button>
+              </div>
+            </div>
 
-              <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4 py-6">
-                {detailFeatures.map((feature) => {
-                  const Icon = feature.icon;
-                  return (
-                    <div key={feature.label} className={`rounded-2xl p-4 text-center ${darkMode ? 'bg-slate-900' : 'bg-slate-100'}`}>
-                      <Icon className={`mx-auto mb-2 h-6 w-6 ${darkMode ? 'text-indigo-400' : 'text-indigo-600'}`} />
-                      <p className={`text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>{feature.label}</p>
+            {/* Feature badges */}
+            <div className={`grid grid-cols-2 gap-2 pt-4 border-t ${divider}`}>
+              {badges.map((badge) => {
+                const Icon = badge.icon;
+                return (
+                  <div
+                    key={badge.label}
+                    className={`flex items-center gap-3 p-3 border ${darkMode ? 'border-neutral-800' : 'border-neutral-100'}`}
+                    style={{ borderRadius: 1 }}
+                  >
+                    <Icon size={16} style={{ color: GOLD, flexShrink: 0 }} />
+                    <div>
+                      <p className={`text-xs font-medium ${textPrimary}`}>{badge.label}</p>
+                      <p className={`text-xs ${textMuted}`}>{badge.sub}</p>
                     </div>
-                  );
-                })}
-              </motion.div>
-
-              <motion.div variants={itemVariants} className="flex flex-col gap-4">
-                <div className="flex items-center gap-4">
-                  <span className={`font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>Quantity:</span>
-                  <div className={`flex items-center rounded-full border px-3 ${darkMode ? 'border-slate-700 bg-slate-900' : 'border-slate-300 bg-slate-50'}`}>
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-4 py-2 text-lg font-bold"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                      className={`w-16 bg-transparent text-center text-lg font-bold outline-none ${darkMode ? 'text-white' : 'text-slate-900'}`}
-                    />
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="px-4 py-2 text-lg font-bold"
-                    >
-                      +
-                    </button>
                   </div>
-                </div>
-
-                <div className="flex flex-col gap-4 sm:flex-row">
-                  <button
-                    onClick={handleAddToCart}
-                    className="flex-1 rounded-full bg-linear-to-r from-indigo-600 to-purple-600 px-6 py-4 text-lg font-semibold text-white transition hover:bg-indigo-500"
-                  >
-                    <span className="inline-flex items-center gap-2 justify-center">
-                      <ShoppingCart size={22} /> Add to Cart
-                    </span>
-                  </button>
-                  <button
-                    onClick={handleToggleWishlist}
-                    className={`rounded-full px-6 py-4 text-lg font-semibold transition ${
-                      isWishlisted ? 'bg-rose-500 text-white' : darkMode ? 'bg-slate-900 text-slate-200 hover:bg-slate-800' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    <span className="inline-flex items-center gap-2 justify-center">
-                      <Heart size={22} fill={isWishlisted ? 'currentColor' : 'none'} />
-                      {isWishlisted ? 'Saved' : 'Add to Wishlist'}
-                    </span>
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        </div>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
