@@ -1,32 +1,26 @@
 import mongoose from "mongoose";
 
-const paymentSchema=
-new mongoose.Schema(
-{
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
+const paymentSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
 
-    amount:Number,
+    amount: Number,
 
-    paymentId:String,
+    paymentId: String,
 
-    method:String,
+    method: String,
 
-    status:{
-        type:String,
-        default:"Pending"
-    }
+    status: {
+      type: String,
+      default: "Pending",
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
-},
-{
-timestamps:true
-}
-)
-
-export const Payment=
-mongoose.model(
-"Payment",
-paymentSchema
-)
+export const Payment = mongoose.model("Payment", paymentSchema);
