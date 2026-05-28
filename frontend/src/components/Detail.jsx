@@ -30,10 +30,10 @@ const Detail = () => {
   const getSingleProduct = async () => {
     setLoading(true);
     try {
-      const contextProduct = products.find((p) => String(p.id) === String(id));
+      const contextProduct = products.find((p) => String(p._id || p.id) === String(id));
       if (contextProduct) { setProduct(contextProduct); setLoading(false); return; }
-      const { data } = await axios.get(`/products/${id}`);
-      setProduct(data);
+      const response = await axios.get(`/products/${id}`);
+      setProduct(response.data?.data || null);
     } catch (error) {
       setProduct(null);
     } finally {
@@ -50,8 +50,9 @@ const Detail = () => {
     setTimeout(() => setAddedToCart(false), 1500);
   };
 
-  const isWishlisted = product ? wishlist.some((item) => item.id === product.id) : false;
-  const discount = product ? ((product.id * 7 + 10) % 24) + 10 : 15;
+  const productId = product?._id || product?.id;
+  const isWishlisted = product ? wishlist.some((item) => (item._id || item.id) === productId) : false;
+  const discount = product ? ((Number(productId?.toString().slice(-5).replace(/\D/g, '') || 12) * 7 + 10) % 24) + 10 : 15;
   const rating = Number(product?.rating?.rate || 4.2).toFixed(1);
   const reviews = product?.rating?.count || 120;
 

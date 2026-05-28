@@ -13,11 +13,12 @@ const ProductCard = ({ product }) => {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [hovered, setHovered] = useState(false);
 
-  const discount = ((product.id * 7 + 10) % 24) + 10;
+  const productId = product._id || product.id;
+  const discount = ((Number(productId.toString().slice(-5).replace(/\D/g, '') || 12) * 7 + 10) % 24) + 10;
   const rating = Number(product.rating?.rate || 4.2).toFixed(1);
   const reviews = product.rating?.count || 150;
   const productPrice = Number(product.price) || 99.99;
-  const isWishlisted = wishlist.some((item) => item.id === product.id);
+  const isWishlisted = wishlist.some((item) => (item._id || item.id) === productId);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -34,7 +35,7 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <Link to={`/detail/${product.id}`} className="block h-full" style={{ textDecoration: 'none' }}>
+    <Link to={`/detail/${productId}`} className="block h-full" style={{ textDecoration: 'none' }}>
       <motion.div
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => setHovered(false)}

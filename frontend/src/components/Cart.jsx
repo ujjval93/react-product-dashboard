@@ -91,7 +91,7 @@ const Cart = () => {
             <AnimatePresence initial={false}>
               {cart.map((item) => (
                 <motion.div
-                  key={item.id}
+                  key={item._id || item.id}
                   layout
                   initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -106,7 +106,7 @@ const Cart = () => {
                     style={{ width: 80, height: 80, borderRadius: 1 }}
                   >
                     <img
-                      src={item.image}
+                      src={item.images?.[0] || item.image || '/placeholder.jpg'}
                       alt={item.title}
                       className="h-full w-full object-contain p-2"
                     />
@@ -137,7 +137,7 @@ const Cart = () => {
                   {/* Quantity */}
                   <div className={`flex items-center border ${darkMode ? 'border-neutral-700' : 'border-neutral-200'}`} style={{ borderRadius: 1 }}>
                     <button
-                      onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateCartQuantity(item._id || item.id, item.quantity - 1)}
                       className={`w-8 h-8 flex items-center justify-center text-lg font-light transition-colors ${darkMode ? 'text-neutral-300 hover:bg-neutral-800' : 'text-neutral-600 hover:bg-neutral-50'}`}
                       style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
                       aria-label="Decrease"
@@ -151,7 +151,7 @@ const Cart = () => {
                       {item.quantity}
                     </span>
                     <button
-                      onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateCartQuantity(item._id || item.id, item.quantity + 1)}
                       className={`w-8 h-8 flex items-center justify-center text-lg font-light transition-colors ${darkMode ? 'text-neutral-300 hover:bg-neutral-800' : 'text-neutral-600 hover:bg-neutral-50'}`}
                       style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
                       aria-label="Increase"
@@ -169,7 +169,7 @@ const Cart = () => {
                       ${(Number(item.price) * item.quantity).toFixed(2)}
                     </span>
                     <button
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item._id || item.id)}
                       className="flex items-center gap-1 text-xs text-rose-400 hover:text-rose-600 transition-colors"
                       style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                     >

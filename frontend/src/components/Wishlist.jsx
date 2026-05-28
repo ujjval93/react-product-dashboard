@@ -82,9 +82,9 @@ const Wishlist = () => {
         {/* Grid */}
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <AnimatePresence initial={false}>
-            {wishlist.map((item) => (
+            {wishlist.map((item, index) => (
               <motion.div
-                key={item.id}
+                key={item._id || item.id || `wishlist-${index}`}
                 layout
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -99,7 +99,7 @@ const Wishlist = () => {
                   style={{ height: 180 }}
                 >
                   <img
-                    src={item.image}
+                    src={item.images?.[0] || item.image || '/placeholder.jpg'}
                     alt={item.title}
                     className="h-full w-full object-contain p-5"
                   />
