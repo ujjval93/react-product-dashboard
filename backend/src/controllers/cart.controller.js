@@ -3,12 +3,35 @@ import { Product } from "../models/product.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
+import mongoose from "mongoose";
 
-const calculateCartTotal = (cart) =>
-  cart.products.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+};
+
+const calculateCartTotal = (cart) => {
+  if (!cart || !cart.products || !Array.isArray(cart.products)) {
+    return 0;
+  }
+  return cart.products.reduce((sum, item) => {
+    // Handle deleted products (product might be null after populate if product was deleted)
+    if (!item.product) return sum;
+    const price = item.product.price || 0;
+    const quantity = item.quantity || 1;
+    return sum + (price * quantity);
+  }, 0);
+};
 
 const addToCart = asyncHandler(async (req, res) => {
   const { productId, quantity = 1 } = req.body;
+
+  if (!productId) {
+    throw new ApiError(400, "Product ID is required");
+  }
+
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, "Invalid product ID format");
+  }
 
   const product = await Product.findById(productId);
 
@@ -74,6 +97,10 @@ const updateCartItem = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Product ID is required");
   }
 
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, "Invalid product ID format");
+  }
+
   const cart = await Cart.findOne({ user: req.user._id }).populate("products.product");
 
   if (!cart) {
@@ -100,6 +127,10 @@ const updateCartItem = asyncHandler(async (req, res) => {
 
 const removeCartItem = asyncHandler(async (req, res) => {
   const { productId } = req.params;
+
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, "Invalid product ID format");
+  }
 
   const cart = await Cart.findOne({ user: req.user._id }).populate("products.product");
 

@@ -12,6 +12,7 @@ import Signup from './components/Signup.jsx'
 import SellerLogin from './components/SellerLogin.jsx'
 import SellerRegister from './components/SellerRegister.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
+import Profile from './components/Profile.jsx'
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
           <Route path="/seller/register" element={<SellerRegister />} />
           <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         </Routes>
         <ToastContainer />
       </div>

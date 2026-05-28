@@ -7,9 +7,22 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 import { ApiError } from "../utils/ApiError.js";
+import mongoose from "mongoose";
+
+const isValidObjectId = (id) => {
+  return mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === id;
+};
 
 const addToWishlist = asyncHandler(async (req, res) => {
   const { productId } = req.body;
+
+  if (!productId) {
+    throw new ApiError(400, "Product ID is required");
+  }
+
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, "Invalid product ID format");
+  }
 
   const product = await Product.findById(productId);
 
@@ -57,15 +70,20 @@ const addToWishlist = asyncHandler(async (req, res) => {
 });
 
 const getWishlist = asyncHandler(async (req, res) => {
-  const wishlist = await Wishlist.findOne({
+  let wishlist = await Wishlist.findOne({
     user: req.user._id,
   }).populate("products");
+
+  // If no wishlist exists, create an empty one for the user
+  if (!wishlist) {
+    wishlist = await Wishlist.create({ user: req.user._id, products: [] });
+  }
 
   return res.status(200).json(
     new ApiResponse(
       200,
-
       wishlist,
+      "Wishlist fetched"
     ),
   );
 });
@@ -73,9 +91,17 @@ const getWishlist = asyncHandler(async (req, res) => {
 const removeWishlist = asyncHandler(async (req, res) => {
   const { productId } = req.params;
 
-  const wishlist = await Wishlist.findOne({
+  if (!isValidObjectId(productId)) {
+    throw new ApiError(400, "Invalid product ID format");
+  }
+
+  let wishlist = await Wishlist.findOne({
     user: req.user._id,
   });
+
+  if (!wishlist) {
+    throw new ApiError(404, "Wishlist not found");
+  }
 
   wishlist.products = wishlist.products.filter(
     (item) => item.toString() !== productId,
@@ -89,7 +115,7 @@ const removeWishlist = asyncHandler(async (req, res) => {
 
       wishlist,
 
-      "Removed",
+      "Removed from wishlist",
     ),
   );
 });
