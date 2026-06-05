@@ -25,7 +25,6 @@ const Navbar = () => {
   const { darkMode, toggleTheme } = useDarkMode();
   const { totalCartItems, totalWishlistItems } = useContext(ProductContext);
   const { user, logout } = useContext(AuthContext);
-  const { onLogoutSuccess } = useContext(ProductContext)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -158,20 +157,6 @@ const Navbar = () => {
                   }`}
                 >
                   {user?.fullName?.split(" ")[0] || user?.username || "Profile"}
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.92 }}
-                  onClick={() => {
-                    logout();
-                    navigate("/");
-                  }}
-                  className={`inline-flex h-9 items-center rounded-sm px-4 text-sm font-semibold transition-colors ${
-                    darkMode
-                      ? "border border-neutral-800 bg-transparent text-neutral-300 hover:bg-neutral-900"
-                      : "border border-neutral-200 bg-transparent text-neutral-700 hover:bg-neutral-50"
-                  }`}
-                >
-                  Logout
                 </motion.button>
               </div>
             ) : (
